@@ -1,0 +1,91 @@
+<div class="min-h-screen bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8">📦 Product Inventory</h1>
+
+    <!-- Add Form -->
+    <div class="bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Add Product</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <input [(ngModel)]="form.name" placeholder="Name"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="form.category" placeholder="Category"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="form.price" type="number" placeholder="Price"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="form.quantity" type="number" placeholder="Quantity"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+      </div>
+      <button (click)="addProduct()"
+        class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+        Add Product
+      </button>
+    </div>
+
+    <!-- Edit Form -->
+    <div *ngIf="editingProduct" class="bg-white border-2 border-indigo-400 rounded-xl shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Edit Product</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <input [(ngModel)]="editForm.name" placeholder="Name"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="editForm.category" placeholder="Category"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="editForm.price" type="number" placeholder="Price"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <input [(ngModel)]="editForm.quantity" type="number" placeholder="Quantity"
+          class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+      </div>
+      <div class="flex gap-3 mt-4">
+        <button (click)="updateProduct()"
+          class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+          Save Changes
+        </button>
+        <button (click)="cancelEdit()"
+          class="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Table -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Products</h2>
+      <p *ngIf="loading" class="text-gray-500">Loading...</p>
+      <table class="w-full text-left" *ngIf="!loading">
+        <thead>
+          <tr class="border-b">
+            <th class="py-3 px-4 font-semibold text-gray-600">ID</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Name</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Category</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Price</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Quantity</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products"
+            class="border-b hover:bg-gray-50 transition"
+            [class.bg-indigo-50]="editingProduct?.id === product.id">
+            <td class="py-3 px-4 text-gray-500">{{ product.id }}</td>
+            <td class="py-3 px-4 font-medium">{{ product.name }}</td>
+            <td class="py-3 px-4">{{ product.category }}</td>
+            <td class="py-3 px-4">${{ product.price }}</td>
+            <td class="py-3 px-4">{{ product.quantity }}</td>
+            <td class="py-3 px-4 flex gap-2">
+              <button (click)="startEdit(product)"
+                class="bg-amber-400 text-white px-3 py-1 rounded-lg hover:bg-amber-500 transition text-sm">
+                Edit
+              </button>
+              <button (click)="deleteProduct(product.id)"
+                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition text-sm">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!loading && products.length === 0" class="text-gray-400 text-center py-8">
+        No products yet. Add one above!
+      </p>
+    </div>
+  </div>
+</div>
