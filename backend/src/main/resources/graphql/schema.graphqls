@@ -1,0 +1,49 @@
+type Role {
+    id: ID!
+    name: String!
+}
+
+type Category {
+    id: ID!
+    name: String!
+}
+
+type User {
+    id: ID!
+    username: String!
+    role: Role!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    price: Float!
+    quantity: Int!
+    category: Category!
+    createdBy: User!
+    createdAt: String
+}
+
+type Analytics {
+    totalProducts: Int!
+    totalStockValue: Float!
+    lowStockCount: Int!
+    categoryCount: Int!
+}
+
+type Query {
+    getProducts: [Product]
+    getProduct(id: ID!): Product
+    getProductsByCategory(categoryId: ID!): [Product]
+    searchProducts(keyword: String!): [Product]
+    getAnalytics: Analytics
+    getUsers: [User]
+    getCategories: [Category]
+}
+
+type Mutation {
+    addProduct(name: String!, categoryId: ID!, price: Float!, quantity: Int!): Product
+    updateProduct(id: ID!, name: String, categoryId: ID, price: Float, quantity: Int): Product
+    deleteProduct(id: ID!): Boolean
+    deleteUser(id: ID!): Boolean
+}
