@@ -1,0 +1,35 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">
+      {{ isLogin ? '🔐 Login' : '📝 Register' }}
+    </h1>
+
+    <div *ngIf="message" class="bg-green-100 text-green-700 px-4 py-2 rounded mb-4">{{ message }}</div>
+    <div *ngIf="error" class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{{ error }}</div>
+
+    <div class="flex flex-col gap-4">
+      <input [(ngModel)]="username" placeholder="Username"
+        class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+      <input [(ngModel)]="password" type="password" placeholder="Password"
+        class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+
+      <select *ngIf="!isLogin" [(ngModel)]="role"
+        class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+        <option value="USER">User</option>
+        <option value="ADMIN">Admin</option>
+      </select>
+
+      <button (click)="submit()"
+        class="bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition font-semibold">
+        {{ isLogin ? 'Login' : 'Register' }}
+      </button>
+    </div>
+
+    <p class="text-center mt-4 text-sm text-gray-500">
+      {{ isLogin ? "Don't have an account?" : "Already have an account?" }}
+      <button (click)="toggle()" class="text-indigo-600 font-semibold hover:underline ml-1">
+        {{ isLogin ? 'Register' : 'Login' }}
+      </button>
+    </p>
+  </div>
+</div>

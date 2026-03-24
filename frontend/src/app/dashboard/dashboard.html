@@ -1,0 +1,61 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Navbar -->
+  <nav class="bg-green-600 text-white px-8 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">📦 Product Dashboard</h1>
+    <button (click)="logout()" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition">Logout</button>
+  </nav>
+
+  <div class="p-8 max-w-5xl mx-auto">
+
+    <!-- Low stock banner -->
+    <div *ngIf="products.length > 0 && products.some(isLowStock)"
+      class="bg-red-100 border border-red-300 text-red-700 px-6 py-3 rounded-xl mb-6 font-medium">
+      ⚠ Some products are running low on stock!
+    </div>
+
+    <!-- Search & Sort -->
+    <div class="bg-white rounded-xl shadow p-4 mb-6 flex gap-4">
+      <input [(ngModel)]="searchKeyword" (input)="search()" placeholder="Search products..."
+        class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400" />
+      <button (click)="sort('price')"
+        class="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+        Price {{ sortField === 'price' ? (sortAsc ? '↑' : '↓') : '' }}
+      </button>
+      <button (click)="sort('quantity')"
+        class="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+        Quantity {{ sortField === 'quantity' ? (sortAsc ? '↑' : '↓') : '' }}
+      </button>
+    </div>
+
+    <!-- Product Table -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b">
+            <th class="py-3 px-4 font-semibold text-gray-600">Name</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Category</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Price</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Quantity</th>
+            <th class="py-3 px-4 font-semibold text-gray-600">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of filteredProducts" class="border-b hover:bg-gray-50 transition"
+            [class.bg-red-50]="isLowStock(product.quantity)">
+            <td class="py-3 px-4 font-medium">{{ product.name }}</td>
+            <td class="py-3 px-4">{{ product.category.name }}</td>
+            <td class="py-3 px-4">${{ product.price }}</td>
+            <td class="py-3 px-4">{{ product.quantity }}</td>
+            <td class="py-3 px-4">
+              <span *ngIf="isLowStock(product.quantity)"
+                class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">⚠ Low Stock</span>
+              <span *ngIf="!isLowStock(product.quantity)"
+                class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-semibold">✓ In Stock</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="filteredProducts.length === 0" class="text-gray-400 text-center py-8">No products found.</p>
+    </div>
+  </div>
+</div>
