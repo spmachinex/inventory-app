@@ -1,11 +1,12 @@
 package com.inventory.backend.model;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
 @Table(name = "categories")
-public class Category {
+public class Category implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

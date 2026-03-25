@@ -1,6 +1,8 @@
 package com.inventory.backend.model;
 
-public class Analytics {
+import java.io.Serializable;
+
+public class Analytics implements Serializable {
     private int totalProducts;
     private double totalStockValue;
     private int lowStockCount;

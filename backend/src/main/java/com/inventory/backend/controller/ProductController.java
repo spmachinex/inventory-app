@@ -1,7 +1,12 @@
 package com.inventory.backend.controller;
 
+import com.inventory.backend.messaging.LowStockEvent;
+import com.inventory.backend.messaging.LowStockProducer;
 import com.inventory.backend.model.*;
 import com.inventory.backend.repository.*;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.graphql.data.method.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,15 +23,18 @@ public class ProductController {
     private final ProductRepository productRepo;
     private final UserRepository userRepo;
     private final CategoryRepository categoryRepo;
+    private final LowStockProducer lowStockProducer;
 
     public ProductController(ProductRepository productRepo, UserRepository userRepo,
-                             CategoryRepository categoryRepo) {
+            CategoryRepository categoryRepo, LowStockProducer lowStockProducer) {
         this.productRepo = productRepo;
         this.userRepo = userRepo;
         this.categoryRepo = categoryRepo;
+        this.lowStockProducer = lowStockProducer;
     }
 
     @QueryMapping
+    @Cacheable("products")
     public List<Product> getProducts() {
         return productRepo.findAll();
     }
@@ -47,12 +55,14 @@ public class ProductController {
     }
 
     @QueryMapping
+    @Cacheable("categories")
     public List<Category> getCategories() {
         return categoryRepo.findAll();
     }
 
     @QueryMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Cacheable("analytics")
     public Analytics getAnalytics() {
         List<Product> all = productRepo.findAll();
         int total = all.size();
@@ -71,31 +81,51 @@ public class ProductController {
     @MutationMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Product addProduct(@Argument String name, @Argument UUID categoryId,
-                              @Argument Double price, @Argument Integer quantity) {
+            @Argument Double price, @Argument Integer quantity) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = userRepo.findByUsername(auth.getName()).orElseThrow();
         Category category = categoryRepo.findById(categoryId).orElseThrow();
-        return productRepo.save(new Product(name, price, quantity, category, currentUser));
+        Product saved = productRepo.save(new Product(name, price, quantity, category, currentUser));
+
+        if (saved.getQuantity() < 10) {
+            lowStockProducer.sendLowStockAlert(
+                    new LowStockEvent(saved.getId(), saved.getName(), saved.getQuantity()));
+        }
+        return saved;
     }
 
     @MutationMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"products", "analytics"}, allEntries = true)
     public Product updateProduct(@Argument UUID id, @Argument String name,
-                                 @Argument UUID categoryId, @Argument Double price,
-                                 @Argument Integer quantity) {
+            @Argument UUID categoryId, @Argument Double price,
+            @Argument Integer quantity) {
         Product p = productRepo.findById(id).orElseThrow();
-        if (name != null) p.setName(name);
+        if (name != null)
+            p.setName(name);
         if (categoryId != null) {
             Category category = categoryRepo.findById(categoryId).orElseThrow();
             p.setCategory(category);
         }
-        if (price != null) p.setPrice(price);
-        if (quantity != null) p.setQuantity(quantity);
-        return productRepo.save(p);
+        if (price != null)
+            p.setPrice(price);
+        if (quantity != null)
+            p.setQuantity(quantity);
+
+        Product saved = productRepo.save(p);
+
+        // Fire low stock event if quantity drops below 10
+        if (saved.getQuantity() < 10) {
+            lowStockProducer.sendLowStockAlert(
+                    new LowStockEvent(saved.getId(), saved.getName(), saved.getQuantity()));
+        }
+
+        return saved;
     }
 
     @MutationMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"products", "analytics"}, allEntries = true)
     public Boolean deleteProduct(@Argument UUID id) {
         productRepo.deleteById(id);
         return true;
@@ -107,4 +137,6 @@ public class ProductController {
         userRepo.deleteById(id);
         return true;
     }
+
+    
 }
